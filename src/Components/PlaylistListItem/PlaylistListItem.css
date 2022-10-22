@@ -1,0 +1,24 @@
+.PlaylistListItem {
+  
+    display: none;
+
+}
+
+label {
+    cursor: pointer;
+}
+
+ input[type="radio"]:checked +* {
+    
+    background-color: rgb(65, 40, 164);
+}
+
+.playlistLabel {
+    padding: 0.75rem 0.75rem;
+    border-bottom: 1px solid #6f6f6f;
+}
+
+
+.PlaylistListItem h3 {
+    padding: 0.5rem;
+}
