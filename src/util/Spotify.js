@@ -29,6 +29,7 @@ const Spotify = {
       let promise = new Promise((resolve, reject) => {
         resolve(userID);
       });
+      return promise;
     }
 
     const accessToken = Spotify.getAccessToken();
@@ -94,7 +95,7 @@ const Spotify = {
     })
       .then((response) => response.json())
       .then((responseJson) => {
-        console.log(responseJson)
+        // console.log(responseJson)
         if (!responseJson.items) {
           return [];
         }
@@ -105,32 +106,72 @@ const Spotify = {
           album: item.track.album.name,
           uri: item.track.uri,
         }));
-      })
+      });
   },
 
-  savePlaylist(name, uris) {
+  savePlaylist(name, uris, playlistId, tracks) {
     if (!name || !uris) return;
 
     const accessToken = this.getAccessToken();
     const headers = { Authorization: `Bearer ${accessToken}` };
 
-    return fetch(`${baseUrl}/users/${userID}/playlists`, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({ name: name }),
-    })
-      .then((response) => response.json())
-      .then((jsonResponse) => {
-        const playlistID = jsonResponse.id;
-        return fetch(
-          `${baseUrl}/users/${userID}/playlists/${playlistID}/tracks`,
+    if (playlistId) {
+      return this.getPlaylist(tracks)
+        .then((response) => {
+          return response.map((item) => item.uri);
+        })
+        .then((originaluris) => {
+          let newUris;
+          let newUrisObj;
+          if (originaluris.length === 0) 
           {
-            method: "POST",
-            headers: headers,
-            body: JSON.stringify({ uris: uris }),
+            newUris = uris;
+            return fetch(`${baseUrl}/playlists/${playlistId}/tracks`, {
+              method: "POST",
+              headers: headers,
+              body: JSON.stringify({ uris: newUris }),
+            });
+          } else if (uris.length > originaluris.length) {
+            newUris = uris.filter((x) => !originaluris.includes(x));
+            return fetch(`${baseUrl}/playlists/${playlistId}/tracks`, {
+              method: "POST",
+              headers: headers,
+              body: JSON.stringify({ uris: newUris }),
+            });
+          } else {
+            newUris = originaluris.filter((x) => !uris.includes(x));
+            newUrisObj = newUris.map((x) => ({
+              uri: x,
+            }));
+            return fetch(`${baseUrl}/playlists/${playlistId}/tracks`, {
+              method: "DELETE",
+              headers: headers,
+              body: JSON.stringify({ tracks: newUrisObj }),
+            });
           }
-        );
-      });
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    } else {
+      return fetch(`${baseUrl}/users/${userID}/playlists`, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify({ name: name }),
+      })
+        .then((response) => response.json())
+        .then((jsonResponse) => {
+          const playlistID = jsonResponse.id;
+          return fetch(
+            `${baseUrl}/users/${userID}/playlists/${playlistID}/tracks`,
+            {
+              method: "POST",
+              headers: headers,
+              body: JSON.stringify({ uris: uris }),
+            }
+          );
+        });
+    }
   },
 };
 

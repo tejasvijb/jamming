@@ -1,6 +1,6 @@
 import React from "react";
 import "./PlaylistListItem.css";
-import Spotify from "../../util/Spotify";
+// import Spotify from "../../util/Spotify";
 
 class PlaylistListItem extends React.Component {
   constructor(props) {
@@ -9,7 +9,7 @@ class PlaylistListItem extends React.Component {
   }
 
   onClick(e) {
-   this.props.onSelect(e.target.id)
+   this.props.onSelect(e.target.id,this.props.name,this.props.id)
    
   };
 

@@ -16,7 +16,7 @@ class Playlist extends React.Component {
   render() {
     return (
       <div className="Playlist">
-        <input defaultValue={"New Playlist"} onChange={this.handleNameChange}/>
+        <input onChange={this.handleNameChange} value={this.props.playlistName}/>
         <TrackList
           tracks={this.props.playlistTracks}
           onRemove={this.props.onRemove}
